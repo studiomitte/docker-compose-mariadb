@@ -1,0 +1,25 @@
+FROM alpine:latest
+
+RUN apk add --no-cache mariadb-client mariadb-connector-c bash
+
+# create backup dir
+RUN mkdir /backup
+RUN mkdir /backup/mysql
+RUN mkdir /backup/files
+
+# copy backup script for mysql
+COPY ./scripts/backup-mysql.sh /usr/bin/backup-mysql.sh
+RUN chmod +x /usr/bin/backup-mysql.sh
+
+
+
+####### mysql backup ##########
+# root password is set via docker secret, so we have to set the env 
+# variable from the secret 
+
+RUN echo '45  1  *  *  *  MYSQL_HOST=db MYSQL_ROOT_PASSWORD=$(cat /run/secrets/mysql_root_password) /usr/bin/backup-mysql.sh' > /etc/crontabs/root
+
+
+
+
+CMD [ "crond", "-l", "2", "-f" ]

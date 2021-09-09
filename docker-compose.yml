@@ -1,0 +1,73 @@
+#############################################
+# Maria DB server + backup
+#############################################
+version: "3"
+
+services:
+
+  db:
+    build: 
+      context: .
+      dockerfile: Dockerfile-mariadb
+    container_name: ${ENV_CONTAINER_NAME}-01
+    volumes:
+    # create persistent docker volume
+    - ./data:/var/lib/mysql
+    # mount configuration
+    - ./config/:/etc/mysql/conf.d
+
+    restart: always
+    secrets:
+      - mysql_root_password
+      - mysql_app_password
+    
+    # default DB is shopware staging    
+    environment:
+    - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
+    - MYSQL_PASSWORD_FILE=/run/secrets/mysql_app_password
+    - MYSQL_USER=
+    - MYSQL_DATABASE=
+    - MYSQL_ALLOW_EMPTY_PASSWORD=no
+
+  backup:
+    build:
+      context: .
+      dockerfile: Dockerfile-backup
+    container_name: ${ENV_CONTAINER_NAME}-backup
+    restart: always
+
+    volumes:
+      # mount backup directory mysql
+    - ./backup:/backup/mysql
+
+    secrets:
+      - mysql_root_password
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    container_name: ${ENV_CONTAINER_NAME}-phpmyadmin
+    expose:
+      - 80
+    links:
+      - db:db
+    depends_on:
+      - "db"
+    environment:
+      - PMA_ABSOLUTE_URI=${ENV_PHPMYADMIN_URI}
+      - PMA_HOST=db
+      - UPLOAD_LIMIT=2G
+
+
+# secret files on server
+secrets:
+  mysql_root_password:
+    file: /path/to/your/root/password/file.txt
+  mysql_app_password:
+    file: /path/to/your/default/app/password/file.txt
+    
+# default network from nginx reverse proxy container
+networks:
+  default:
+    external:
+      name: ${ENV_DOCKER_NETWORK_NAME}
