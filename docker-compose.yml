@@ -21,7 +21,7 @@ services:
       - mysql_root_password
       - mysql_app_password
     
-    # default DB is shopware staging    
+   
     environment:
     - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
     - MYSQL_PASSWORD_FILE=/run/secrets/mysql_app_password
