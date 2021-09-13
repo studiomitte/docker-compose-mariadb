@@ -35,7 +35,8 @@ services:
       dockerfile: Dockerfile-backup
     container_name: ${ENV_CONTAINER_NAME}-backup
     restart: always
-
+    tty: true
+  
     volumes:
       # mount backup directory mysql
     - ./backup:/backup/mysql
