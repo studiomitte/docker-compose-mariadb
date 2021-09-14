@@ -16,6 +16,12 @@ services:
     # mount configuration
     - ./config/:/etc/mysql/conf.d
 
+    # set static internal IP in docker network
+    # must match the current docker network address range
+    networks:
+        default:
+            ipv4_address: ${ENV_STATIC_IP}
+
     restart: always
     secrets:
       - mysql_root_password
@@ -67,7 +73,7 @@ secrets:
   mysql_app_password:
     file: /path/to/your/default/app/password/file.txt
     
-# default network from nginx reverse proxy container
+# default network for this docker stack
 networks:
   default:
     external:
