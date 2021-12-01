@@ -35,6 +35,7 @@ MYSQL_USR="root"
 # password will be fetched from docker container
 MYSQL_PWD=$MYSQL_ROOT_PASSWORD
 MYSQL_HOST=$MYSQL_HOST
+MYSQL_DEFAULT_CHARSET=utf8
 
 # Use this inside a MySql Docker container
 #
@@ -61,7 +62,12 @@ databases=`$MYSQL_CMD -h $MYSQL_HOST --user=$MYSQL_USR -p$MYSQL_PWD -e "SHOW DAT
  
 for db in $databases; do
   echo "Dumping $db ..."
-  $MYSQL_DMP --force --opt -h $MYSQL_HOST --user=$MYSQL_USR -p$MYSQL_PWD --databases "$db" | gzip > "$BACKUP_DIR/$TIMESTAMP/$db.gz"
+  $MYSQL_DMP --force --opt --skip-set-charset --default-character-set=$MYSQL_DEFAULT_CHARSET -h $MYSQL_HOST --user=$MYSQL_USR -p$MYSQL_PWD --databases "$db" | gzip > "$BACKUP_DIR/$TIMESTAMP/$db.gz"
+  if [[ $? -eq 0 ]]; then
+     echo "$db backup successful"
+  else
+     echo "$db backup failed"
+  fi
 done
 
 echo
