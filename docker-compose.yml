@@ -34,6 +34,9 @@ services:
     - MYSQL_USER=
     - MYSQL_DATABASE=
     - MYSQL_ALLOW_EMPTY_PASSWORD=no
+  
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
 
   backup:
     build:
