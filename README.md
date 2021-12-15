@@ -5,6 +5,12 @@ Simple Docker Compose stack to run a mariadb database with custom configuration 
 * backup script & container creates configurable daily backups of all databases
 
 
-## How to restore Database
+## How to restore Database (with utf8 safe encoding)
 * unpack sql backup file in backup directoy
-* restore database: `cat MY_BACKUP_DIRECCTORY/MY_BACKUP_SQL_FILE | docker exec -i ID_OF_DOCKER_CONTAINER mysql -uroot --password=MY_ROOT_PASSWORD MY_DATABASE_NAME`
+* mount backup directory to db container
+* login into db container and start a bash `docker exec -it CONTAINER_ID bash`
+* `mysql -uroot -p --default-character-set=utf8mb4`
+* enter root password
+* `mysql > SET names 'utf8';`
+* `mysql > SOURCE 'MY_MOUNTEND_BACKUP_DIRECCTORY/MY_BACKUP_SQL_FILE';`
+*
