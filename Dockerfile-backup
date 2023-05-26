@@ -8,8 +8,8 @@ RUN mkdir /backup/mysql
 RUN mkdir /backup/files
 
 # copy backup script for mysql
-COPY ./scripts/backup-mysql.sh /usr/bin/backup-mysql.sh
-RUN chmod +x /usr/bin/backup-mysql.sh
+COPY ./scripts/backup-mysql.sh /usr/bin/scripts/backup-mysql.sh
+RUN chmod +x /usr/bin/scripts/backup-mysql.sh
 
 
 
@@ -17,7 +17,7 @@ RUN chmod +x /usr/bin/backup-mysql.sh
 # root password is set via docker secret, so we have to set the env 
 # variable from the secret 
 
-RUN echo '45  1  *  *  *  MYSQL_HOST=db MYSQL_ROOT_PASSWORD=$(cat /run/secrets/mysql_root_password) /usr/bin/backup-mysql.sh' > /etc/crontabs/root
+RUN echo '45  1  *  *  *  MYSQL_HOST=db MYSQL_ROOT_PASSWORD=$(cat /run/secrets/mysql_root_password) /usr/bin/scripts/backup-mysql.sh' > /etc/crontabs/root
 
 
 
