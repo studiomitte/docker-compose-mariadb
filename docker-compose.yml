@@ -50,6 +50,9 @@ services:
       # mount backup directory mysql
     - ./backup:/backup/mysql
 
+    environment:
+    - MYSQL_HOST=db
+
     secrets:
       - mysql_root_password
 
