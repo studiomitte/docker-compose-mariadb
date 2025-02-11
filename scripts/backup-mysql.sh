@@ -39,9 +39,16 @@ MYSQL_DEFAULT_CHARSET=utf8
 
 # Use this inside a MySql Docker container
 #
-MYSQL_CMD=mysql
-MYSQL_DMP=mysqldump
-MYSQL_CHECK=mysqlcheck
+
+### mariadb
+MYSQL_CMD=mariadb
+MYSQL_DMP=mariadb-dump
+MYSQL_CHECK=mariadb-check
+
+### mysql
+#MYSQL_CMD=mysql
+#MYSQL_DMP=mysqldump
+#MYSQL_CHECK=mysqlcheck
 
 #
 # Setup.end
@@ -51,23 +58,24 @@ MYSQL_CHECK=mysqlcheck
 #
 echo
 echo "Checking all databases - this can take a while ..."
-$MYSQL_CHECK -h $MYSQL_HOST  -u $MYSQL_USR --password=$MYSQL_PWD --auto-repair --all-databases
+$MYSQL_CHECK -h $MYSQL_HOST  -u $MYSQL_USR --password=$MYSQL_PWD --auto-repair --all-databases --skip_ssl
 
 # Backup
 #
 echo
 echo "Starting backup ..."
 mkdir -p "$BACKUP_DIR/$TIMESTAMP"
-databases=`$MYSQL_CMD -h $MYSQL_HOST --user=$MYSQL_USR -p$MYSQL_PWD -e "SHOW DATABASES;" | grep -Ev "(Database|information_schema|performance_schema)"`
- 
-for db in $databases; do
-  echo "Dumping $db ..."
-  $MYSQL_DMP --force --opt --skip-set-charset --default-character-set=$MYSQL_DEFAULT_CHARSET -h $MYSQL_HOST --user=$MYSQL_USR -p$MYSQL_PWD  "$db" | gzip > "$BACKUP_DIR/$TIMESTAMP/$db.gz"
-  if [[ $? -eq 0 ]]; then
+databases=`$MYSQL_CMD -h $MYSQL_HOST --user=$MYSQL_USR -p$MYSQL_PWD --skip_ssl -e "SHOW DATABASES;" | grep -Ev "(Database|information_schema|performance_schema)"`
+
+  for db in $databases; do
+    echo "Dumping $db ..."
+    $MYSQL_DMP --force --opt --skip-set-charset --skip_ssl --default-character-set=$MYSQL_DEFAULT_CHARSET -h $MYSQL_HOST --user=$MYSQL_USR -p$MYSQL_PWD "$db" | gzip > "$BACKUP_DIR/$TIMESTAMP/$db.gz"
+    if [[ $? -eq 0 ]]; then
      echo "$db backup successful"
-  else
+   else
      echo "$db backup failed"
   fi
+
 done
 
 echo
